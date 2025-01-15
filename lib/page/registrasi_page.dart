@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+// import 'package:pl1_kasir/main/admin.dart';
+// import 'package:pl1_kasir/main/home.dart';
+import 'package:pl1_kasir/main/login.dart';
+// import 'package:pl1_kasir/main/home.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
-import 'registrasi.dart';
+// import '../main/login.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,10 +16,25 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController usernameController = TextEditingController();
+  final supabase = Supabase.instance.client;
   bool _isSwitched = false;
   final _focusNode = FocusNode();
   final _focusUser = FocusNode();
   final _focusPass = FocusNode();
+
+  Future<void> signUp() async {
+    await supabase.from('users').insert({
+      'email': emailController.text,
+      'username': usernameController.text,
+      'password': passwordController.text,
+    }).then((value) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => Login()));
+    });
+  }
 
   @override
   void initState() {
@@ -68,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Let\'s Sign You In',
+                      'Getting started',
                       style: TextStyle(
                         fontSize: 25,
                         fontFamily: 'Roboto',
@@ -80,7 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 5,
                     ),
                     Text(
-                      'Welcome back, you\'ve been missed!',
+                      'Create an account to continue',
                       style: TextStyle(
                         fontSize: 15,
                         fontFamily: 'Roboto',
@@ -147,6 +168,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     children: [
                       TextFormField(
+                        controller: emailController,
                         style: TextStyle(fontWeight: FontWeight.bold),
                         focusNode: _focusNode,
                         decoration: InputDecoration(
@@ -169,6 +191,30 @@ class _LoginPageState extends State<LoginPage> {
                         height: 10,
                       ),
                       TextFormField(
+                        controller: usernameController,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        focusNode: _focusUser,
+                        decoration: InputDecoration(
+                          labelText: 'Username',
+                          border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(50)),
+                              borderSide: BorderSide(color: Colors.grey)),
+                          prefixIcon: Icon(Icons.person),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(50)),
+                            borderSide: BorderSide(
+                                color: _focusUser.hasFocus
+                                    ? Colors.yellowAccent
+                                    : Colors.grey),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        controller: passwordController,
                         focusNode: _focusPass,
                         style: TextStyle(fontWeight: FontWeight.bold),
                         decoration: InputDecoration(
@@ -219,9 +265,11 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 50, left: 30, right: 30),
+                padding: const EdgeInsets.only(top: 20, left: 30, right: 30),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    signUp();
+                  },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.yellowAccent,
                       minimumSize: Size(double.infinity, 50),
@@ -243,7 +291,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Don\'t have an account?',
+                        'Already have an account?',
                         style: TextStyle(
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.bold,
@@ -251,13 +299,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextButton(
                           onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const Registrasi()));
+                            
                           },
                           child: Text(
-                            'Sign In',
+                            'Sign Up',
                             style: TextStyle(
                                 fontFamily: 'Roboto',
                                 fontWeight: FontWeight.bold,

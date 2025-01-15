@@ -7,9 +7,12 @@ environment:
   sdk: ^3.6.0
 
 dependencies:
+  convex_bottom_bar: ^3.2.0
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.16
+  sliding_clipped_nav_bar: ^3.1.1
+  supabase_flutter: ^2.8.3
 
 dev_dependencies:
   flutter_test:
@@ -25,6 +28,7 @@ flutter:
     - img/google.png
     - img/facebook.png
     - img/twitter.png
+    - img/background_menu.png
 
   fonts:
     - family: Poppins

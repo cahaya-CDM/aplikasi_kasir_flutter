@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart';
+import '../page/kasir_page.dart';
 
 void main() {
-  runApp(const Login());
+  runApp(const Kasir());
 }
 
-class Login extends StatelessWidget {
-  const Login({super.key});
+class Kasir extends StatelessWidget {
+  const Kasir({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Login',
-      home: const LoginPage(),
+      title: 'Kasir',
+      home: const Kasirpage(),
     );
   }
 }

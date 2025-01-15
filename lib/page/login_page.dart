@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+// import 'package:pl1_kasir/main/admin.dart';
+import 'package:pl1_kasir/main/home.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
-import 'login.dart';
+import '../main/registrasi.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,10 +13,38 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  final supabase = Supabase.instance.client;
   bool _isSwitched = false;
   final _focusNode = FocusNode();
   final _focusUser = FocusNode();
   final _focusPass = FocusNode();
+
+  Future<void> signInCustom(String email, String password) async {
+    await supabase
+        .from('users')
+        .select()
+        .eq('email', email)
+        .eq('password', password)
+        .single();
+  }
+
+  void signIn() async {
+    try {
+      final email = emailController.text;
+      final password = passwordController.text;
+      await signInCustom(email, password);
+      print('' + email + ' ' + password);
+      Navigator.push(
+          // ignore: use_build_context_synchronously
+          context, MaterialPageRoute(builder: (context) => const Home()));
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error: $e');
+    }
+  }
 
   @override
   void initState() {
@@ -68,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Getting started',
+                      'Let\'s Sign You In',
                       style: TextStyle(
                         fontSize: 25,
                         fontFamily: 'Roboto',
@@ -80,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 5,
                     ),
                     Text(
-                      'Create an account to continue',
+                      'Welcome back, you\'ve been missed!',
                       style: TextStyle(
                         fontSize: 15,
                         fontFamily: 'Roboto',
@@ -144,72 +175,55 @@ class _LoginPageState extends State<LoginPage> {
               Center(
                 child: Padding(
                   padding: const EdgeInsets.only(top: 40, left: 20, right: 20),
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        focusNode: _focusNode,
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(50)),
-                              borderSide: BorderSide(color: Colors.grey)),
-                          prefixIcon: Icon(Icons.email),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(50)),
-                            borderSide: BorderSide(
-                                color: _focusNode.hasFocus
-                                    ? Colors.yellowAccent
-                                    : Colors.grey),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: emailController,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          focusNode: _focusNode,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                                borderSide: BorderSide(color: Colors.grey)),
+                            prefixIcon: Icon(Icons.email),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(50)),
+                              borderSide: BorderSide(
+                                  color: _focusNode.hasFocus
+                                      ? Colors.yellowAccent
+                                      : Colors.grey),
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      TextFormField(
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        focusNode: _focusUser,
-                        decoration: InputDecoration(
-                          labelText: 'Username',
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(50)),
-                              borderSide: BorderSide(color: Colors.grey)),
-                          prefixIcon: Icon(Icons.person),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(50)),
-                            borderSide: BorderSide(
-                                color: _focusUser.hasFocus
-                                    ? Colors.yellowAccent
-                                    : Colors.grey),
-                          ),
+                        SizedBox(
+                          height: 10,
                         ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      TextFormField(
-                        focusNode: _focusPass,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(50)),
-                              borderSide: BorderSide(color: Colors.grey)),
-                          prefixIcon: Icon(Icons.key),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(50)),
-                            borderSide: BorderSide(
-                                color: _focusPass.hasFocus
-                                    ? Colors.yellowAccent
-                                    : Colors.grey),
+                        TextFormField(
+                          controller: passwordController,
+                          focusNode: _focusPass,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                                borderSide: BorderSide(color: Colors.grey)),
+                            prefixIcon: Icon(Icons.key),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(50)),
+                              borderSide: BorderSide(
+                                  color: _focusPass.hasFocus
+                                      ? Colors.yellowAccent
+                                      : Colors.grey),
+                            ),
                           ),
-                        ),
-                      )
-                    ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -241,9 +255,11 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 20, left: 30, right: 30),
+                padding: const EdgeInsets.only(top: 50, left: 30, right: 30),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    signIn();
+                  },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.yellowAccent,
                       minimumSize: Size(double.infinity, 50),
@@ -251,10 +267,11 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(50))),
                   child: Text(
                     'SIGN UP',
-                    style: TextStyle(color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    fontFamily: 'Roboto'),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        fontFamily: 'Roboto'),
                   ),
                 ),
               ),
@@ -265,7 +282,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Already have an account?',
+                        'Don\'t have an account?',
                         style: TextStyle(
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.bold,
@@ -273,11 +290,13 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextButton(
                           onPressed: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) => Login()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Registrasi()));
                           },
                           child: Text(
-                            'Sign Up',
+                            'Sign In',
                             style: TextStyle(
                                 fontFamily: 'Roboto',
                                 fontWeight: FontWeight.bold,
