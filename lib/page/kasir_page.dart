@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pl1_kasir/page/login_page.dart';
-// import '../main/registrasi.dart';
+
+// import 'package:pl1_kasir/page/login_page.dart';
+import '../main/registrasi.dart';
 
 class Kasirpage extends StatefulWidget {
   const Kasirpage({super.key});
@@ -65,7 +66,7 @@ class _KasirpageState extends State<Kasirpage> {
             const SizedBox(height: 100),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const Registrasi()));
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(70, 70),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../page/registrasi_page.dart';
 
 Future<void> main() async {
@@ -19,7 +20,7 @@ class Registrasi extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Registrasi',
-      home: const LoginPage(),
+      home: const RegistrasiPage(),
     );
   }
 }

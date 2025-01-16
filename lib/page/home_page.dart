@@ -11,6 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String _jeniProduk = 'Jenis Produk Tidak Diketahui';
   bool _isDrawerOpen = false;
   final supabase = Supabase.instance.client;
   final TextEditingController _namaBarangController = TextEditingController();
@@ -18,14 +19,11 @@ class _HomePageState extends State<HomePage> {
   TextInputFormatter currencyFormatter = FilteringTextInputFormatter.digitsOnly;
   List<Map<String, dynamic>> barang = [];
 
-  Future<void> _tambahBarang() async {
+  Future<void> _tambahBarang(String jenisProduk) async {
     await supabase.from('barang').insert({
       'nama_barang': _namaBarangController.text,
-      'harga_barang': _hargaBarangController.text
-    }).then((value) {
-      setState(() {
-        _isDrawerOpen = false;
-      });
+      'harga_barang': _hargaBarangController.text,
+      'jenis': jenisProduk
     });
   }
 
@@ -41,6 +39,118 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _isDrawerOpen = true;
     });
+  }
+
+  void _tombolPilihJenisProduk(String item) async {
+    setState(() {
+      _jeniProduk =
+          (_jeniProduk == item) ? 'Jenis Produk Tidak Diketahui' : item;
+    });
+    // await _tambahBarang(_jeniProduk);
+  }
+
+  Future<void> _editProduk(Map<String, dynamic> item) async {
+    final nameController = TextEditingController(text: item['nama_barang']);
+    final priceController =
+        TextEditingController(text: item['harga_barang'].toString());
+    String jenisProduk =
+        item['jenis']; // Jenis produk awal (Makanan atau Minuman)
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Produk'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'Nama Barang'),
+            ),
+            TextField(
+              controller: priceController,
+              inputFormatters: [currencyFormatter],
+              decoration: const InputDecoration(labelText: 'Harga Barang'),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Checkbox(
+                  value: jenisProduk == 'Makanan',
+                  onChanged: (value) {
+                    if (value == true) {
+                      setState(() {
+                        jenisProduk = 'Makanan';
+                      });
+                    }
+                  },
+                ),
+                const Text('Makanan'),
+                Checkbox(
+                  value: jenisProduk == 'Minuman',
+                  onChanged: (value) {
+                    if (value == true) {
+                      setState(() {
+                        jenisProduk = 'Minuman';
+                      });
+                    }
+                  },
+                ),
+                const Text('Minuman'),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+
+              final updatedName = nameController.text;
+              final updatedPrice =
+                  int.tryParse(priceController.text) ?? item['harga_barang'];
+
+              // Perbarui data di Supabase
+              await supabase
+                  .from('barang')
+                  .update({
+                    'nama_barang': updatedName,
+                    'harga_barang': updatedPrice,
+                    'jenis': jenisProduk,
+                  })
+                  .eq('id', item['id'])
+                  .then((value) {
+                    // Update data di List barang lokal
+                    setState(() {
+                      final index =
+                          barang.indexWhere((b) => b['id'] == item['id']);
+                      if (index != -1) {
+                        barang[index]['nama_barang'] = updatedName;
+                        barang[index]['harga_barang'] = updatedPrice;
+                        barang[index]['jenis'] = jenisProduk;
+                      }
+                    });
+                  });
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _hapusProduk(int id) async {
+    try {
+      await supabase.from('barang').delete().eq('id', id);
+      tampilBarang();
+    } catch (e) {
+      print('gagal');
+    }
   }
 
   @override
@@ -70,18 +180,58 @@ class _HomePageState extends State<HomePage> {
                   Column(
                     // crossAxisAlignment: CrossAxisAlignment,
                     children: [
-                      barang.isEmpty ? Center(child: CircularProgressIndicator(),)
-                      :
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: barang.length,
-                          itemBuilder: (context, index){
-                          return ListTile(
-                            title: Text(barang[index]['nama_barang']),
-                            subtitle: Text('${barang[index]['harga_barang']}'),
-                          );
-                        }),
-                      )
+                      barang.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 250),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                          : Expanded(
+                              child: ListView.builder(
+                                  itemCount: barang.length,
+                                  itemBuilder: (context, index) {
+                                    IconData iconProduk = Icons.help;
+                                    if (barang[index]['jenis'] == 'Makanan') {
+                                      iconProduk = Icons.fastfood;
+                                    } else if (barang[index]['jenis'] ==
+                                        'Minuman') {
+                                      iconProduk = Icons.local_drink;
+                                    }
+                                    return ListTile(
+                                      leading: Icon(iconProduk),
+                                      title: Text(barang[index]['nama_barang']),
+                                      subtitle: Text(
+                                          '${barang[index]['harga_barang']}'),
+                                      trailing: SizedBox(
+                                        width: 85,
+                                        child: Row(
+                                          children: [
+                                            IconButton(
+                                                onPressed: () {
+                                                  _hapusProduk(barang[index]['id']);
+                                                },
+                                                icon: Icon(
+                                                  Icons.delete,
+                                                  color: Colors.red,
+                                                )),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            IconButton(
+                                                onPressed: () {
+                                                  _editProduk(barang[index]);
+                                                },
+                                                icon: Icon(
+                                                  Icons.edit,
+                                                  color: Colors.blue,
+                                                ))
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                            )
                     ],
                   ),
                   if (_isDrawerOpen)
@@ -125,7 +275,31 @@ class _HomePageState extends State<HomePage> {
                                           borderSide: BorderSide(
                                               color: Colors.teal, width: 2.0))),
                                 ),
-                                SizedBox(height: 50),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: _jeniProduk == 'Makanan',
+                                      onChanged: (bool? value) {
+                                        _tombolPilihJenisProduk('Makanan');
+                                      },
+                                    ),
+                                    Text('Makanan'),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                    Checkbox(
+                                      value: _jeniProduk == 'Minuman',
+                                      onChanged: (bool? value) {
+                                        _tombolPilihJenisProduk('Minuman');
+                                      },
+                                    ),
+                                    Text('Minuman')
+                                  ],
+                                ),
+                                SizedBox(height: 20),
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.only(
@@ -134,7 +308,10 @@ class _HomePageState extends State<HomePage> {
                                           color: Colors.black, width: 1),
                                       backgroundColor: Colors.green),
                                   onPressed: () {
-                                    _tambahBarang();
+                                    setState(() {
+                                      _tambahBarang;
+                                      _isDrawerOpen = false;
+                                    });
                                   },
                                   child: const Text('Simpan',
                                       style: TextStyle(
