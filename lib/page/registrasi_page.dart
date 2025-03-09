@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
-// import 'package:pl1_kasir/main/admin.dart';
-// import 'package:pl1_kasir/main/home.dart';
 import 'package:pl1_kasir/main/login.dart';
-// import 'package:pl1_kasir/main/home.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-// import 'package:flutter_svg/flutter_svg.dart';
-// import '../main/login.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegistrasiPage extends StatefulWidget {
   const RegistrasiPage({super.key});
 
   @override
-  State<RegistrasiPage> createState() => _LoginPageState();
+  State<RegistrasiPage> createState() => _RegistrasiPageState();
 }
 
-class _LoginPageState extends State<RegistrasiPage> {
+class _RegistrasiPageState extends State<RegistrasiPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
+  bool _isObscure = true;
   final supabase = Supabase.instance.client;
   bool _isSwitched = false;
   final _focusNode = FocusNode();
@@ -31,8 +26,7 @@ class _LoginPageState extends State<RegistrasiPage> {
       'username': usernameController.text,
       'password': passwordController.text,
     }).then((value) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => Login()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
     });
   }
 
@@ -217,8 +211,21 @@ class _LoginPageState extends State<RegistrasiPage> {
                         controller: passwordController,
                         focusNode: _focusPass,
                         style: TextStyle(fontWeight: FontWeight.bold),
+                        obscureText: _isObscure,
                         decoration: InputDecoration(
                           labelText: 'Password',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isObscure
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isObscure = !_isObscure;
+                              });
+                            },
+                          ),
                           border: OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(50)),
@@ -277,42 +284,14 @@ class _LoginPageState extends State<RegistrasiPage> {
                           borderRadius: BorderRadius.circular(50))),
                   child: Text(
                     'SIGN UP',
-                    style: TextStyle(color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    fontFamily: 'Roboto'),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        fontFamily: 'Roboto'),
                   ),
                 ),
               ),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Already have an account?',
-                        style: TextStyle(
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15),
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            
-                          },
-                          child: Text(
-                            'Sign Up',
-                            style: TextStyle(
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                                color: Colors.yellowAccent),
-                          ))
-                    ],
-                  ),
-                ),
-              )
             ],
           ),
         ),
